@@ -1,14 +1,13 @@
 from airflow.decorators import dag, task
 from datetime import datetime
-import socket
-import time
+
 
 @dag(
     dag_id="dynamic_task_mapping",
     start_date=datetime(2024, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["demo", "distributed"],
+    tags=["dynamic_mapping"],
 )
 def dynamic_task_mapping():
 
@@ -20,39 +19,22 @@ def dynamic_task_mapping():
             "file_3.csv",
             "file_4.csv",
             "file_5.csv",
-            "file_6.csv",
-            "file_7.csv",
-            "file_8.csv",
-            "file_9.csv",
-            "file_10.csv",
         ]
 
     @task
     def process_file(filename: str):
-        worker = socket.gethostname()
-
-        print(f"START {filename} -> {worker}")
-
-        time.sleep(10)
-
-        print(f"END {filename} -> {worker}")
-
-        return {
-            "file": filename,
-            "worker": worker
-        }
+        print(f"Đang xử lý: {filename}")
+        return f"Hoàn thành: {filename}"
 
     @task
     def summary(results: list):
-        print("=== THỐNG KÊ PHÂN PHỐI TASK ===")
-
+        print("=== KẾT QUẢ DYNAMIC TASK MAPPING ===")
         for r in results:
-            print(
-                f"{r['file']} -> {r['worker']}"
-            )
+            print(r)
 
     files = get_files()
     results = process_file.expand(filename=files)
     summary(results)
+
 
 dynamic_task_mapping()
